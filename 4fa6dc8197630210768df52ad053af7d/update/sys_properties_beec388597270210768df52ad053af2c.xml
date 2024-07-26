@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties">
+    <sys_properties action="INSERT_OR_UPDATE">
+        <choices/>
+        <description>This property stores the JSON configuration for defining checklists and their items for catalog tasks. The JSON structure includes country-specific and catalog item-specific checklists, detailing the name, order, and mandatory status of each checklist item. This configuration is used by the ChecklistCreator Script Include to dynamically generate and manage checklists for catalog tasks in ServiceNow.</description>
+        <ignore_cache>true</ignore_cache>
+        <is_private>false</is_private>
+        <name>x_916860_autocklst.catalogTask.checklists</name>
+        <read_roles/>
+        <suffix>catalogTask.checklists</suffix>
+        <sys_class_name>sys_properties</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2024-07-20 11:09:01</sys_created_on>
+        <sys_id>beec388597270210768df52ad053af2c</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>x_916860_autocklst.catalogTask.checklists</sys_name>
+        <sys_package display_value="Catalog Task Checklist Automator" source="x_916860_autocklst">4fa6dc8197630210768df52ad053af7d</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Catalog Task Checklist Automator">4fa6dc8197630210768df52ad053af7d</sys_scope>
+        <sys_update_name>sys_properties_beec388597270210768df52ad053af2c</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2024-07-25 23:58:05</sys_updated_on>
+        <type>string</type>
+        <value>[&#13;
+  {&#13;
+    "catalog_item_name": "Example Catalog Item 1",&#13;
+    "catalog_item_sys_id": "96cbb6c7975e015021983d1e6253afc3",&#13;
+    "checklist_name": "Checklist 1",&#13;
+    "items": [&#13;
+      {&#13;
+        "name": "Item1 Name1",&#13;
+        "order": 1,&#13;
+        "mandatory": true&#13;
+      },&#13;
+      {&#13;
+        "name": "Item1 Name2",&#13;
+        "order": 2,&#13;
+        "mandatory": false&#13;
+      },&#13;
+      {&#13;
+        "name": "Item1 Name3",&#13;
+        "order": 3,&#13;
+        "mandatory": true&#13;
+      }&#13;
+    ]&#13;
+  }&#13;
+]&#13;
+</value>
+        <write_roles/>
+    </sys_properties>
+    <sys_translated_text action="delete_multiple" query="documentkey=beec388597270210768df52ad053af2c"/>
+</record_update>

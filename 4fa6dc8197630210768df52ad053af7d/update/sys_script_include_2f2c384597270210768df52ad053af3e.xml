@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_916860_autocklst.ChecklistCreator</api_name>
+        <caller_access/>
+        <client_callable>false</client_callable>
+        <description/>
+        <name>ChecklistCreator</name>
+        <script><![CDATA[var ChecklistCreator = Class.create();
+ChecklistCreator.prototype = {
+    initialize: function() {},
+
+    /**
+     * Retrieves the checklist data for a catalog item from the system property.
+     * 
+     * @param {String} catalogItemSysId - The sys_id of the catalog item.
+     * @returns {Object|null} - Returns the checklist data as a JSON object if it exists, null otherwise.
+     */
+    getChecklistData: function(catalogItemSysId) {
+        try {
+            /* Get the JSON from the system property */
+            var jsonString = gs.getProperty('x_916860_autocklst.catalogTask.checklists');
+            if (!jsonString) {
+                gs.error('System property x_916860_autocklst.catalogTask.checklists is not set or is empty');
+                return null;
+            }
+
+            /* Parse the JSON string */
+            var checklists;
+            try {
+                checklists = JSON.parse(jsonString);
+            } catch (e) {
+                gs.error('Failed to parse JSON from system property: ' + e.message);
+                return null;
+            }
+
+            /* Retrieve the checklist data for the catalog item */
+            for (var i = 0; i < checklists.length; i++) {
+                if (checklists[i].catalog_item_sys_id === catalogItemSysId) {
+                    return checklists[i];
+                }
+            }
+
+            return null;
+        } catch (e) {
+            gs.error('Unexpected error occurred in getChecklistData: ' + e.message);
+            return null;
+        }
+    },
+
+    /**
+     * Creates checklists and items for a catalog task based on the retrieved checklist data.
+     * 
+     * @param {String} catalogTaskSysId - The sys_id of the catalog task.
+     * @param {Object} checklistData - The checklist data retrieved from the system property.
+     */
+    createChecklistsForCatalogTask: function(catalogTaskSysId, checklistData) {
+        try {
+            if (!checklistData) {
+                gs.error('No checklist data provided for catalog task: ' + catalogTaskSysId);
+                return;
+            }
+
+            var items = checklistData.items;
+            if (!items) {
+                gs.error('Checklist items not found for the specified catalog task and checklist name');
+                return;
+            }
+
+            /* Check if a checklist already exists for the catalog task */
+            var existingChecklistGR = new GlideRecord('checklist');
+            existingChecklistGR.addQuery('document', catalogTaskSysId);
+            existingChecklistGR.query();
+            if (existingChecklistGR.next()) {
+                gs.info('Checklist already exists for catalog task: ' + catalogTaskSysId);
+                return;
+            }
+
+            /* Create checklist record */
+            var checklistSysId;
+            try {
+                var checklistGR = new GlideRecord('checklist');
+                checklistGR.initialize();
+                checklistGR.document = catalogTaskSysId;
+                checklistGR.name = checklistData.checklist_name;
+                checklistGR.table = 'sc_task';
+                checklistSysId = checklistGR.insert();
+            } catch (e) {
+                gs.error('Failed to create checklist record for catalog task: ' + e.message);
+                return;
+            }
+
+            if (!checklistSysId) {
+                gs.error('Failed to create checklist record for catalog task: ' + catalogTaskSysId);
+                return;
+            }
+
+            /* Create checklist items */
+            try {
+                items.forEach(function(item) {
+                    var checklistItemGR = new GlideRecord('checklist_item');
+                    checklistItemGR.initialize();
+                    checklistItemGR.checklist = checklistSysId;
+                    checklistItemGR.name = item.name;
+                    checklistItemGR.order = item.order;
+                    checklistItemGR.mandatory = item.mandatory;
+                    checklistItemGR.insert();
+                });
+            } catch (e) {
+                gs.error('Failed to create checklist items: ' + e.message);
+                return;
+            }
+
+            gs.info('Checklist and items created successfully for catalog task: ' + catalogTaskSysId);
+        } catch (e) {
+            gs.error('Unexpected error occurred in createChecklistsForCatalogTask: ' + e.message);
+        }
+    },
+
+    /**
+     * Checks if all mandatory checklist items are checked for a given catalog task.
+     * 
+     * @param {String} catalogTaskSysId - The sys_id of the catalog task.
+     * @returns {Boolean} - Returns true if all mandatory checklist items are checked, false otherwise.
+     */
+    areMandatoryChecklistItemsChecked: function(catalogTaskSysId) {
+        try {
+            var checklistGR = new GlideRecord('checklist');
+            checklistGR.addQuery('document', catalogTaskSysId);
+            checklistGR.query();
+            if (!checklistGR.next()) {
+                gs.error('No checklist found for catalog task: ' + catalogTaskSysId);
+                return true;
+            }
+
+            var checklistSysId = checklistGR.getValue('sys_id');
+
+            var checklistItemGR = new GlideRecord('checklist_item');
+            checklistItemGR.addQuery('checklist', checklistSysId);
+            checklistItemGR.addQuery('mandatory', true);
+            checklistItemGR.query();
+
+            while (checklistItemGR.next()) {
+                if (!checklistItemGR.getValue('checked')) {
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (e) {
+            gs.error('Unexpected error occurred in areMandatoryChecklistItemsChecked: ' + e.message);
+            return false;
+        }
+    },
+
+    type: 'ChecklistCreator'
+};
+]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2024-07-20 11:07:23</sys_created_on>
+        <sys_id>2f2c384597270210768df52ad053af3e</sys_id>
+        <sys_mod_count>4</sys_mod_count>
+        <sys_name>ChecklistCreator</sys_name>
+        <sys_package display_value="Catalog Task Checklist Automator" source="x_916860_autocklst">4fa6dc8197630210768df52ad053af7d</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="Catalog Task Checklist Automator">4fa6dc8197630210768df52ad053af7d</sys_scope>
+        <sys_update_name>sys_script_include_2f2c384597270210768df52ad053af3e</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2024-07-25 23:58:14</sys_updated_on>
+    </sys_script_include>
+</record_update>
