@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
     <sys_script_include action="INSERT_OR_UPDATE">
-        <access>package_private</access>
+        <access>public</access>
         <active>true</active>
         <api_name>x_916860_autocklst.ChecklistCreator</api_name>
         <caller_access/>
         <client_callable>false</client_callable>
         <description/>
+        <mobile_callable>false</mobile_callable>
         <name>ChecklistCreator</name>
+        <sandbox_callable>false</sandbox_callable>
         <script><![CDATA[var ChecklistCreator = Class.create();
 ChecklistCreator.prototype = {
     initialize: function() {},
@@ -119,55 +121,92 @@ ChecklistCreator.prototype = {
     },
 
     /**
-     * Checks if all mandatory checklist items are checked for a given catalog task.
-     * 
-     * @param {String} catalogTaskSysId - The sys_id of the catalog task.
-     * @returns {Boolean} - Returns true if all mandatory checklist items are checked, false otherwise.
-     */
-    areMandatoryChecklistItemsChecked: function(catalogTaskSysId) {
-        try {
-            var checklistGR = new GlideRecord('checklist');
-            checklistGR.addQuery('document', catalogTaskSysId);
-            checklistGR.query();
-            if (!checklistGR.next()) {
-                gs.error('No checklist found for catalog task: ' + catalogTaskSysId);
-                return true;
-            }
+ * Checks if all mandatory checklist items are checked for a given catalog task.
+ * 
+ * @param {String} catalogTaskSysId - The sys_id of the catalog task.
+ * @param {String} checklistSysId - The sys_id of the checklist.
+ * @returns {Boolean} - Returns true if all mandatory checklist items are completed, false otherwise.
+ */
+areMandatoryChecklistItemsChecked: function(catalogTaskSysId, checklistSysId) {
+    try {
+        // Retrieve the catalog task record
+        var catalogTaskGR = new GlideRecord('sc_task');
+        if (!catalogTaskGR.get(catalogTaskSysId)) {
+            gs.error('Catalog task record not found: ' + catalogTaskSysId);
+            return false;
+        }
 
-            var checklistSysId = checklistGR.getValue('sys_id');
+        var ritmSysId = catalogTaskGR.getValue('request_item');  // Get the RITM sys_id
+        var ritmGR = new GlideRecord('sc_req_item');
+        if (!ritmGR.get(ritmSysId)) {
+            gs.error('RITM record not found for catalog task: ' + catalogTaskSysId);
+            return false;
+        }
 
-            var checklistItemGR = new GlideRecord('checklist_item');
-            checklistItemGR.addQuery('checklist', checklistSysId);
-            checklistItemGR.addQuery('mandatory', true);
-            checklistItemGR.query();
+        var catalogItemSysId = ritmGR.getValue('cat_item');  // Get the catalog item sys_id
+        
+        // Get checklist data for the catalog item from the system property
+        var checklistData = this.getChecklistData(catalogItemSysId);
+        if (!checklistData) {
+            gs.error('No checklist data found for catalog item: ' + catalogItemSysId);
+            return false;
+        }
 
-            while (checklistItemGR.next()) {
-                if (!checklistItemGR.getValue('checked')) {
+        var items = checklistData.items;
+        if (!items || items.length === 0) {
+            gs.error('No checklist items found for catalog item: ' + catalogItemSysId);
+            return false;
+        }
+
+        // Check if all mandatory checklist items are completed
+        for (var i = 0; i < items.length; i++) {
+            var checklistItem = items[i];
+            if (checklistItem.mandatory) { // Only check mandatory items
+                var checklistItemGR = new GlideRecord('checklist_item');
+                checklistItemGR.addQuery('checklist', checklistSysId);
+                checklistItemGR.addQuery('name', checklistItem.name);  // Match the item name from property
+                checklistItemGR.query();
+
+                if (!checklistItemGR.next() || checklistItemGR.getValue('complete') !== '1') {  // Use 'complete' field to check completion
+                    gs.info('Mandatory checklist item not completed: ' + checklistItem.name);
                     return false;
                 }
             }
-
-            return true;
-        } catch (e) {
-            gs.error('Unexpected error occurred in areMandatoryChecklistItemsChecked: ' + e.message);
-            return false;
         }
-    },
+
+        // All mandatory items are completed
+        return true;
+    } catch (e) {
+        gs.error('Unexpected error occurred in areMandatoryChecklistItemsChecked: ' + e.message);
+        return false;
+    }
+},
+
 
     type: 'ChecklistCreator'
-};
-]]></script>
+};]]></script>
         <sys_class_name>sys_script_include</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2024-07-20 11:07:23</sys_created_on>
         <sys_id>2f2c384597270210768df52ad053af3e</sys_id>
-        <sys_mod_count>4</sys_mod_count>
+        <sys_mod_count>9</sys_mod_count>
         <sys_name>ChecklistCreator</sys_name>
         <sys_package display_value="Catalog Task Checklist Automator" source="x_916860_autocklst">4fa6dc8197630210768df52ad053af7d</sys_package>
         <sys_policy>read</sys_policy>
         <sys_scope display_value="Catalog Task Checklist Automator">4fa6dc8197630210768df52ad053af7d</sys_scope>
         <sys_update_name>sys_script_include_2f2c384597270210768df52ad053af3e</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2024-07-25 23:58:14</sys_updated_on>
+        <sys_updated_on>2024-09-12 22:51:01</sys_updated_on>
     </sys_script_include>
+    <sys_es_latest_script action="INSERT_OR_UPDATE">
+        <id>2f2c384597270210768df52ad053af3e</id>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2024-09-12 21:18:51</sys_created_on>
+        <sys_id>5cbe41ee97e41210af54bd0de053afeb</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2024-09-12 21:18:51</sys_updated_on>
+        <table>sys_script_include</table>
+        <use_es_latest>true</use_es_latest>
+    </sys_es_latest_script>
 </record_update>

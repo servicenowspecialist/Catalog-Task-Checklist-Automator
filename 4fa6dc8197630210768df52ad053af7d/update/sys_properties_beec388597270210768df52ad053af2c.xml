@@ -11,19 +11,19 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2024-07-20 11:09:01</sys_created_on>
         <sys_id>beec388597270210768df52ad053af2c</sys_id>
-        <sys_mod_count>2</sys_mod_count>
+        <sys_mod_count>3</sys_mod_count>
         <sys_name>x_916860_autocklst.catalogTask.checklists</sys_name>
         <sys_package display_value="Catalog Task Checklist Automator" source="x_916860_autocklst">4fa6dc8197630210768df52ad053af7d</sys_package>
         <sys_policy/>
         <sys_scope display_value="Catalog Task Checklist Automator">4fa6dc8197630210768df52ad053af7d</sys_scope>
         <sys_update_name>sys_properties_beec388597270210768df52ad053af2c</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2024-07-25 23:58:05</sys_updated_on>
+        <sys_updated_on>2024-09-12 19:06:59</sys_updated_on>
         <type>string</type>
         <value>[&#13;
   {&#13;
     "catalog_item_name": "Example Catalog Item 1",&#13;
-    "catalog_item_sys_id": "96cbb6c7975e015021983d1e6253afc3",&#13;
+    "catalog_item_sys_id": "039c516237b1300054b6a3549dbe5dfc",&#13;
     "checklist_name": "Checklist 1",&#13;
     "items": [&#13;
       {&#13;
